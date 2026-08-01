@@ -1,42 +1,24 @@
 import axios from 'axios';
-import { Note, type FetchNotesResponse, type CreateNotePayload } from '@/types/note';
+import { type Note, type CreateNotePayload } from '@/types/note';
 
-const API_BASE_URL = 'https://notehub-public.goit.study/api';
+
+
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_NOTEHUB_URL || 'https://notehub-public.goit.study/api',
   headers: {
     Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
   },
 });
-
-api.interceptors.request.use((config) => {
-  const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export const fetchNotes = async (
-  page: number = 1,
-  search: string | number = ''
-): Promise<FetchNotesResponse> => {
-  try {
-    const params: Record<string, unknown> = {
-      page: Number(page) || 1,
-    };
-
-    if (typeof search === 'string' && search.trim() !== '') {
-      params.search = search.trim();
-    }
-
-    const response = await api.get('/notes', { params });
-    return response.data;
-  } catch (error: any) {
-    console.error('Ошибка при получении заметок:', error);
-    throw error;
-  }
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+export const fetchNotes = async (page = 1, search = ''): Promise<FetchNotesResponse> => {
+  const response = await api.get<FetchNotesResponse>('/notes', {
+    params: { page, search },
+  });
+  return response.data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
