@@ -1,40 +1,35 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNoteById } from '@/lib/api';
-import css from './NoteDetails.module.css';
+import css from './NoteDetails.module.css'; 
 
-export default function NoteDetailsClient() {
-  const params = useParams();
-  const id = params?.id as string;
+interface NoteDetailsClientProps {
+  id: string;
+}
 
+export default function NoteDetailsClient({ id }: NoteDetailsClientProps) {
   const { data: note, isLoading, isError } = useQuery({
     queryKey: ['note', id],
     queryFn: () => fetchNoteById(id),
-    refetchOnMount: false, // Обязательно по ТЗ!
   });
 
-  if (isLoading) {
-    return <p>Loading, please wait...</p>;
-  }
-
-  if (isError || !note) {
-    return <p>Something went wrong.</p>;
-  }
+  if (isLoading) return <p>Loading note details...</p>;
+  if (isError || !note) return <p>Failed to load note.</p>;
 
   return (
-    <main className={css.main}>
-      <div className={css.container}>
-        <div className={css.item}>
-          <div className={css.header}>
-            <h2>{note.title}</h2>
-          </div>
-          <p className={css.tag}>{note.tag}</p>
-          <p className={css.content}>{note.content}</p>
-          <p className={css.date}>{new Date(note.createdAt).toLocaleDateString()}</p>
-        </div>
+    <div className={css.container}>
+      <div className={css.card}>
+        <h1 className={css.title}>{note.title}</h1>
+        
+        {note.tag && <span className={css.tag}>{note.tag}</span>}
+        
+        <p className={css.content}>{note.content}</p>
+        
+        {note.createdAt && (
+          <span className={css.date}>{note.createdAt}</span>
+        )}
       </div>
-    </main>
+    </div>
   );
 }

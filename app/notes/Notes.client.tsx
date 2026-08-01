@@ -29,15 +29,24 @@ export default function NotesClient() {
     queryKey: ['notes', debouncedSearch, page],
     queryFn: () => fetchNotes(page, debouncedSearch),
   });
-  return (
-    <div className={css.container}>
-      <div className={css.topBar}>
+return (
+    <div className={css.app}>
+      <div className={css.toolbar}>
         <SearchBox value={search} onChange={handleSearchChange} />
-        <button 
-          className={css.createBtn} 
+        
+        {data && data.totalPages > 1 && (
+          <Pagination
+            currentPage={page}
+            pageCount={data.totalPages}
+            onPageChange={setPage}
+          />
+        )}
+
+        <button
+          className={css.button}
           onClick={() => setIsModalOpen(true)}
         >
-          Create Note
+          Create note +
         </button>
       </div>
 
@@ -45,22 +54,7 @@ export default function NotesClient() {
       {isError && <p>Error loading notes!</p>}
 
       {data && (
-        <>
-<NoteList notes={Array.isArray(data) ? data : data?.notes} />
-          {data.totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              pageCount={data.totalPages}
-              onPageChange={setPage}
-            />
-          )}
-        </>
-      )}
-
-      {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm onClose={() => setIsModalOpen(false)} />
-        </Modal>
+        <NoteList notes={Array.isArray(data) ? data : data?.notes} />
       )}
     </div>
   );
